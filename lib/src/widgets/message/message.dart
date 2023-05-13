@@ -52,6 +52,7 @@ class Message extends StatelessWidget {
     required this.usePreviewData,
     this.userAgent,
     this.videoMessageBuilder,
+    this.sideMarginValue,
   });
 
   /// Build an audio message inside predefined bubble.
@@ -154,6 +155,9 @@ class Message extends StatelessWidget {
   /// Show user avatars for received messages. Useful for a group chat.
   final bool showUserAvatars;
 
+  /// Side padding between Avatar - Left/Right Size
+  final double? sideMarginValue;
+
   /// Build a text message inside predefined bubble.
   final Widget Function(
     types.TextMessage, {
@@ -222,11 +226,11 @@ class Message extends StatelessWidget {
           ? EdgeInsetsDirectional.only(
               bottom: 4,
               end: isMobile ? query.padding.right : 0,
-              start: 20 + (isMobile ? query.padding.left : 0),
+              start: sideMarginValue! + (isMobile ? query.padding.left : 0),
             )
           : EdgeInsets.only(
               bottom: 4,
-              left: 20 + (isMobile ? query.padding.left : 0),
+              left: sideMarginValue! + (isMobile ? query.padding.left : 0),
               right: isMobile ? query.padding.right : 0,
             ),
       child: Row(
