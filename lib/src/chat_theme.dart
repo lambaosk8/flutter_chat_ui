@@ -51,61 +51,62 @@ const secondaryDark = Color(0xff2b2250);
 @immutable
 abstract class ChatTheme {
   /// Creates a new chat theme based on provided colors and text styles.
-  const ChatTheme({
-    required this.attachmentButtonIcon,
-    required this.attachmentButtonMargin,
-    required this.backgroundColor,
-    required this.dateDividerMargin,
-    required this.dateDividerTextStyle,
-    required this.deliveredIcon,
-    required this.documentIcon,
-    required this.emptyChatPlaceholderTextStyle,
-    required this.errorColor,
-    required this.errorIcon,
-    required this.inputBackgroundColor,
-    required this.inputBorderRadius,
-    this.inputContainerDecoration,
-    required this.inputMargin,
-    required this.inputPadding,
-    required this.inputTextColor,
-    this.inputTextCursorColor,
-    required this.inputTextDecoration,
-    required this.inputTextStyle,
-    required this.messageBorderRadius,
-    required this.messageInsetsHorizontal,
-    required this.messageInsetsVertical,
-    required this.primaryColor,
-    required this.receivedEmojiMessageTextStyle,
-    this.receivedMessageBodyBoldTextStyle,
-    this.receivedMessageBodyCodeTextStyle,
-    this.receivedMessageBodyLinkTextStyle,
-    required this.receivedMessageBodyTextStyle,
-    required this.receivedMessageCaptionTextStyle,
-    required this.receivedMessageDocumentIconColor,
-    required this.receivedMessageLinkDescriptionTextStyle,
-    required this.receivedMessageLinkTitleTextStyle,
-    required this.secondaryColor,
-    required this.seenIcon,
-    required this.sendButtonIcon,
-    required this.sendButtonMargin,
-    required this.sendingIcon,
-    required this.sentEmojiMessageTextStyle,
-    this.sentMessageBodyBoldTextStyle,
-    this.sentMessageBodyCodeTextStyle,
-    this.sentMessageBodyLinkTextStyle,
-    required this.sentMessageBodyTextStyle,
-    required this.sentMessageCaptionTextStyle,
-    required this.sentMessageDocumentIconColor,
-    required this.sentMessageLinkDescriptionTextStyle,
-    required this.sentMessageLinkTitleTextStyle,
-    required this.statusIconPadding,
-    required this.systemMessageTheme,
-    required this.unreadHeaderTheme,
-    required this.userAvatarImageBackgroundColor,
-    required this.userAvatarNameColors,
-    required this.userAvatarTextStyle,
-    required this.userNameTextStyle,
-  });
+  const ChatTheme(
+      {required this.attachmentButtonIcon,
+      required this.attachmentButtonMargin,
+      required this.backgroundColor,
+      required this.dateDividerMargin,
+      required this.dateDividerTextStyle,
+      required this.deliveredIcon,
+      required this.documentIcon,
+      required this.emptyChatPlaceholderTextStyle,
+      required this.errorColor,
+      required this.errorIcon,
+      required this.inputBackgroundColor,
+      required this.inputBorderRadius,
+      this.inputContainerDecoration,
+      required this.inputMargin,
+      required this.inputPadding,
+      required this.inputTextColor,
+      this.inputTextCursorColor,
+      required this.inputTextDecoration,
+      required this.inputTextStyle,
+      required this.messageBorderRadius,
+      required this.messageInsetsHorizontal,
+      required this.messageInsetsVertical,
+      required this.primaryColor,
+      required this.receivedEmojiMessageTextStyle,
+      this.receivedMessageBodyBoldTextStyle,
+      this.receivedMessageBodyCodeTextStyle,
+      this.receivedMessageBodyLinkTextStyle,
+      required this.receivedMessageBodyTextStyle,
+      required this.receivedMessageCaptionTextStyle,
+      required this.receivedMessageDocumentIconColor,
+      required this.receivedMessageLinkDescriptionTextStyle,
+      required this.receivedMessageLinkTitleTextStyle,
+      required this.secondaryColor,
+      required this.seenIcon,
+      required this.sendButtonIcon,
+      required this.sendButtonMargin,
+      required this.sendingIcon,
+      required this.sentEmojiMessageTextStyle,
+      this.sentMessageBodyBoldTextStyle,
+      this.sentMessageBodyCodeTextStyle,
+      this.sentMessageBodyLinkTextStyle,
+      required this.sentMessageBodyTextStyle,
+      required this.sentMessageCaptionTextStyle,
+      required this.sentMessageDocumentIconColor,
+      required this.sentMessageLinkDescriptionTextStyle,
+      required this.sentMessageLinkTitleTextStyle,
+      required this.statusIconPadding,
+      required this.systemMessageTheme,
+      required this.unreadHeaderTheme,
+      required this.userAvatarImageBackgroundColor,
+      required this.userAvatarNameColors,
+      required this.userAvatarTextStyle,
+      required this.userNameTextStyle,
+      this.timeRecieveMessageTextStyle,
+      this.timeSentMessageTextStyle});
 
   /// Icon for select attachment button.
   final Widget? attachmentButtonIcon;
@@ -196,6 +197,10 @@ abstract class ChatTheme {
   /// of received messages
   final TextStyle receivedMessageBodyTextStyle;
 
+  ///  text style used for displaying text on different types
+  /// of time recieve messages
+  final TextStyle? timeRecieveMessageTextStyle;
+
   /// Caption text style used for displaying secondary info (e.g. file size)
   /// on different types of received messages
   final TextStyle receivedMessageCaptionTextStyle;
@@ -247,6 +252,10 @@ abstract class ChatTheme {
   /// Caption text style used for displaying secondary info (e.g. file size)
   /// on different types of sent messages
   final TextStyle sentMessageCaptionTextStyle;
+
+  ///  text style used for displaying text on different types
+  /// of time sent messages
+  final TextStyle? timeSentMessageTextStyle;
 
   /// Color of the document icon on sent messages. Has no effect when
   /// [documentIcon] is used.
@@ -342,6 +351,8 @@ class DefaultChatTheme extends ChatTheme {
     super.receivedMessageBodyBoldTextStyle,
     super.receivedMessageBodyCodeTextStyle,
     super.receivedMessageBodyLinkTextStyle,
+    super.timeSentMessageTextStyle,
+    super.timeRecieveMessageTextStyle,
     super.receivedMessageBodyTextStyle = const TextStyle(
       color: neutral0,
       fontSize: 16,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:intl/intl.dart' as date;
 import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../models/bubble_rtl_alignment.dart';
@@ -18,42 +19,42 @@ import 'user_avatar.dart';
 /// a nice look on larger screens.
 class Message extends StatelessWidget {
   /// Creates a particular message from any message type.
-  const Message({
-    super.key,
-    this.audioMessageBuilder,
-    this.avatarBuilder,
-    this.bubbleBuilder,
-    this.bubbleRtlAlignment,
-    this.customMessageBuilder,
-    this.customStatusBuilder,
-    required this.emojiEnlargementBehavior,
-    this.fileMessageBuilder,
-    required this.hideBackgroundOnEmojiMessages,
-    this.imageHeaders,
-    this.imageMessageBuilder,
-    required this.message,
-    required this.messageWidth,
-    this.nameBuilder,
-    this.onAvatarTap,
-    this.onMessageDoubleTap,
-    this.onMessageLongPress,
-    this.onMessageStatusLongPress,
-    this.onMessageStatusTap,
-    this.onMessageTap,
-    this.onMessageVisibilityChanged,
-    this.onPreviewDataFetched,
-    required this.roundBorder,
-    required this.showAvatar,
-    required this.showName,
-    required this.showStatus,
-    required this.showUserAvatars,
-    this.textMessageBuilder,
-    required this.textMessageOptions,
-    required this.usePreviewData,
-    this.userAgent,
-    this.videoMessageBuilder,
-    this.sideMarginValue = 12.0,
-  });
+  const Message(
+      {super.key,
+      this.audioMessageBuilder,
+      this.avatarBuilder,
+      this.bubbleBuilder,
+      this.bubbleRtlAlignment,
+      this.customMessageBuilder,
+      this.customStatusBuilder,
+      required this.emojiEnlargementBehavior,
+      this.fileMessageBuilder,
+      required this.hideBackgroundOnEmojiMessages,
+      this.imageHeaders,
+      this.imageMessageBuilder,
+      required this.message,
+      required this.messageWidth,
+      this.nameBuilder,
+      this.onAvatarTap,
+      this.onMessageDoubleTap,
+      this.onMessageLongPress,
+      this.onMessageStatusLongPress,
+      this.onMessageStatusTap,
+      this.onMessageTap,
+      this.onMessageVisibilityChanged,
+      this.onPreviewDataFetched,
+      required this.roundBorder,
+      required this.showAvatar,
+      required this.showName,
+      required this.showStatus,
+      required this.showUserAvatars,
+      this.textMessageBuilder,
+      required this.textMessageOptions,
+      required this.usePreviewData,
+      this.userAgent,
+      this.videoMessageBuilder,
+      this.sideMarginValue = 12.0,
+      this.isSeenLastMessage});
 
   /// Build an audio message inside predefined bubble.
   final Widget Function(types.AudioMessage, {required int messageWidth})?
@@ -110,6 +111,9 @@ class Message extends StatelessWidget {
 
   /// Maximum message width.
   final int messageWidth;
+
+  /// time message
+  final bool? isSeenLastMessage;
 
   /// See [TextMessage.nameBuilder].
   final Widget Function(String userId)? nameBuilder;
@@ -213,86 +217,133 @@ class Message extends StatelessWidget {
             topLeft: Radius.circular(messageBorderRadius),
             topRight: Radius.circular(messageBorderRadius),
           );
-
-    return Container(
-      alignment: bubbleRtlAlignment == BubbleRtlAlignment.left
-          ? currentUserIsAuthor
-              ? AlignmentDirectional.centerEnd
-              : AlignmentDirectional.centerStart
-          : currentUserIsAuthor
-              ? Alignment.centerRight
-              : Alignment.centerLeft,
-      margin: bubbleRtlAlignment == BubbleRtlAlignment.left
-          ? EdgeInsetsDirectional.only(
-              bottom: 4,
-              end: isMobile ? query.padding.right : 0,
-              start: sideMarginValue! + (isMobile ? query.padding.left : 0),
-            )
-          : EdgeInsets.only(
-              bottom: 4,
-              left: sideMarginValue! + (isMobile ? query.padding.left : 0),
-              right: isMobile ? query.padding.right : 0,
+    final timeMessageWidget = showStatus == true
+        ? Padding(
+            padding: const EdgeInsets.only(
+                left: 40.0, top: 4.0, bottom: 4.0, right: 8.0),
+            child: Align(
+              alignment: currentUserIsAuthor
+                  ? Alignment.centerRight
+                  : Alignment.centerLeft,
+              child: Text(
+                  message.updatedAt != null
+                      ? message.status == types.Status.seen
+                          ? 'Seen at ${date.DateFormat.Hm().format(DateTime.fromMillisecondsSinceEpoch(message.updatedAt!))}'
+                          : date.DateFormat.Hm().format(
+                              DateTime.fromMillisecondsSinceEpoch(
+                                  message.updatedAt!))
+                      : '',
+                  style: currentUserIsAuthor
+                      ? InheritedChatTheme.of(context)
+                          .theme
+                          .timeSentMessageTextStyle
+                      : InheritedChatTheme.of(context)
+                          .theme
+                          .timeRecieveMessageTextStyle),
             ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisSize: MainAxisSize.min,
-        textDirection: bubbleRtlAlignment == BubbleRtlAlignment.left
-            ? null
-            : TextDirection.ltr,
-        children: [
-          if (!currentUserIsAuthor && showUserAvatars) _avatarBuilder(),
-          ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: messageWidth.toDouble(),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                GestureDetector(
-                  onDoubleTap: () => onMessageDoubleTap?.call(context, message),
-                  onLongPress: () => onMessageLongPress?.call(context, message),
-                  onTap: () => onMessageTap?.call(context, message),
-                  child: onMessageVisibilityChanged != null
-                      ? VisibilityDetector(
-                          key: Key(message.id),
-                          onVisibilityChanged: (visibilityInfo) =>
-                              onMessageVisibilityChanged!(
-                            message,
-                            visibilityInfo.visibleFraction > 0.1,
-                          ),
-                          child: _bubbleBuilder(
-                            context,
-                            borderRadius.resolve(Directionality.of(context)),
-                            currentUserIsAuthor,
-                            enlargeEmojis,
-                          ),
-                        )
-                      : _bubbleBuilder(
-                          context,
-                          borderRadius.resolve(Directionality.of(context)),
-                          currentUserIsAuthor,
-                          enlargeEmojis,
-                        ),
+          )
+        : const SizedBox.shrink();
+    return Column(
+      children: [
+        Container(
+          alignment: bubbleRtlAlignment == BubbleRtlAlignment.left
+              ? currentUserIsAuthor
+                  ? AlignmentDirectional.centerEnd
+                  : AlignmentDirectional.centerStart
+              : currentUserIsAuthor
+                  ? Alignment.centerRight
+                  : Alignment.centerLeft,
+          margin: bubbleRtlAlignment == BubbleRtlAlignment.left
+              ? EdgeInsetsDirectional.only(
+                  bottom: 4,
+                  end: isMobile ? query.padding.right : 0,
+                  start: sideMarginValue! + (isMobile ? query.padding.left : 0),
+                )
+              : EdgeInsets.only(
+                  bottom: 4,
+                  left: sideMarginValue! + (isMobile ? query.padding.left : 0),
+                  right: isMobile ? query.padding.right : 0,
                 ),
-              ],
-            ),
+          child: Column(
+            crossAxisAlignment: currentUserIsAuthor
+                ? CrossAxisAlignment.end
+                : CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                textDirection: bubbleRtlAlignment == BubbleRtlAlignment.left
+                    ? null
+                    : TextDirection.ltr,
+                children: [
+                  if (!currentUserIsAuthor && showUserAvatars) _avatarBuilder(),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: messageWidth.toDouble(),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: currentUserIsAuthor
+                          ? CrossAxisAlignment.end
+                          : CrossAxisAlignment.start,
+                      children: [
+                        GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onDoubleTap: () =>
+                              onMessageDoubleTap?.call(context, message),
+                          onLongPress: () =>
+                              onMessageLongPress?.call(context, message),
+                          onTap: () => onMessageTap?.call(context, message),
+                          child: onMessageVisibilityChanged != null
+                              ? VisibilityDetector(
+                                  key: Key(message.id),
+                                  onVisibilityChanged: (visibilityInfo) =>
+                                      onMessageVisibilityChanged!(
+                                    message,
+                                    visibilityInfo.visibleFraction > 0.1,
+                                  ),
+                                  child: _bubbleBuilder(
+                                    context,
+                                    borderRadius
+                                        .resolve(Directionality.of(context)),
+                                    currentUserIsAuthor,
+                                    enlargeEmojis,
+                                  ),
+                                )
+                              : _bubbleBuilder(
+                                  context,
+                                  borderRadius
+                                      .resolve(Directionality.of(context)),
+                                  currentUserIsAuthor,
+                                  enlargeEmojis,
+                                ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (currentUserIsAuthor)
+                    Padding(
+                      padding: InheritedChatTheme.of(context)
+                          .theme
+                          .statusIconPadding,
+                      /* child: true
+                          ? GestureDetector(
+                              onLongPress: () =>
+                                  onMessageStatusLongPress?.call(context, message),
+                              onTap: () =>
+                                  onMessageStatusTap?.call(context, message),
+                              child: customStatusBuilder != null
+                                  ? customStatusBuilder!(message, context: context)
+                                  : MessageStatus(status: message.status),
+                            )
+                          : null, */
+                    ),
+                ],
+              ),
+              timeMessageWidget
+            ],
           ),
-          if (currentUserIsAuthor)
-            Padding(
-              padding: InheritedChatTheme.of(context).theme.statusIconPadding,
-              child: showStatus
-                  ? GestureDetector(
-                      onLongPress: () =>
-                          onMessageStatusLongPress?.call(context, message),
-                      onTap: () => onMessageStatusTap?.call(context, message),
-                      child: customStatusBuilder != null
-                          ? customStatusBuilder!(message, context: context)
-                          : MessageStatus(status: message.status),
-                    )
-                  : null,
-            ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
