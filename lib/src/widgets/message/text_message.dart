@@ -247,7 +247,7 @@ class TextMessageText extends StatelessWidget {
                 if (url != null && await canLaunchUrl(url)) {
                   await launchUrl(
                     url,
-                    mode: LaunchMode.externalApplication,
+                    mode: LaunchMode.inAppWebView,
                   );
                 }
               }

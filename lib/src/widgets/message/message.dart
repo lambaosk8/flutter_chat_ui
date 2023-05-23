@@ -19,42 +19,43 @@ import 'user_avatar.dart';
 /// a nice look on larger screens.
 class Message extends StatelessWidget {
   /// Creates a particular message from any message type.
-  const Message(
-      {super.key,
-      this.audioMessageBuilder,
-      this.avatarBuilder,
-      this.bubbleBuilder,
-      this.bubbleRtlAlignment,
-      this.customMessageBuilder,
-      this.customStatusBuilder,
-      required this.emojiEnlargementBehavior,
-      this.fileMessageBuilder,
-      required this.hideBackgroundOnEmojiMessages,
-      this.imageHeaders,
-      this.imageMessageBuilder,
-      required this.message,
-      required this.messageWidth,
-      this.nameBuilder,
-      this.onAvatarTap,
-      this.onMessageDoubleTap,
-      this.onMessageLongPress,
-      this.onMessageStatusLongPress,
-      this.onMessageStatusTap,
-      this.onMessageTap,
-      this.onMessageVisibilityChanged,
-      this.onPreviewDataFetched,
-      required this.roundBorder,
-      required this.showAvatar,
-      required this.showName,
-      required this.showStatus,
-      required this.showUserAvatars,
-      this.textMessageBuilder,
-      required this.textMessageOptions,
-      required this.usePreviewData,
-      this.userAgent,
-      this.videoMessageBuilder,
-      this.sideMarginValue = 12.0,
-      this.isSeenLastMessage});
+  const Message({
+    super.key,
+    this.audioMessageBuilder,
+    this.avatarBuilder,
+    this.bubbleBuilder,
+    this.bubbleRtlAlignment,
+    this.customMessageBuilder,
+    this.customStatusBuilder,
+    required this.emojiEnlargementBehavior,
+    this.fileMessageBuilder,
+    required this.hideBackgroundOnEmojiMessages,
+    this.imageHeaders,
+    this.imageMessageBuilder,
+    required this.message,
+    required this.messageWidth,
+    this.nameBuilder,
+    this.onAvatarTap,
+    this.onMessageDoubleTap,
+    this.onMessageLongPress,
+    this.onMessageStatusLongPress,
+    this.onMessageStatusTap,
+    this.onMessageTap,
+    this.onMessageVisibilityChanged,
+    this.onPreviewDataFetched,
+    required this.roundBorder,
+    required this.showAvatar,
+    required this.showName,
+    required this.showStatus,
+    required this.showUserAvatars,
+    this.textMessageBuilder,
+    required this.textMessageOptions,
+    required this.usePreviewData,
+    this.userAgent,
+    this.videoMessageBuilder,
+    this.sideMarginValue = 12.0,
+    this.showTimeSeenMessage,
+  });
 
   /// Build an audio message inside predefined bubble.
   final Widget Function(types.AudioMessage, {required int messageWidth})?
@@ -112,9 +113,6 @@ class Message extends StatelessWidget {
   /// Maximum message width.
   final int messageWidth;
 
-  /// time message
-  final bool? isSeenLastMessage;
-
   /// See [TextMessage.nameBuilder].
   final Widget Function(String userId)? nameBuilder;
 
@@ -155,6 +153,10 @@ class Message extends StatelessWidget {
 
   /// Show message's status.
   final bool showStatus;
+
+  /// Show time seen message.
+
+  final bool? showTimeSeenMessage;
 
   /// Show user avatars for received messages. Useful for a group chat.
   final bool showUserAvatars;
@@ -217,29 +219,37 @@ class Message extends StatelessWidget {
             topLeft: Radius.circular(messageBorderRadius),
             topRight: Radius.circular(messageBorderRadius),
           );
-    final timeMessageWidget = showStatus == true
+    final timeMessageWidget = showStatus
         ? Padding(
             padding: const EdgeInsets.only(
-                left: 40.0, top: 4.0, bottom: 4.0, right: 8.0),
+              left: 40.0,
+              top: 4.0,
+              bottom: 4.0,
+              right: 8.0,
+            ),
             child: Align(
               alignment: currentUserIsAuthor
                   ? Alignment.centerRight
                   : Alignment.centerLeft,
               child: Text(
-                  message.updatedAt != null
-                      ? message.status == types.Status.seen
-                          ? 'Seen at ${date.DateFormat.Hm().format(DateTime.fromMillisecondsSinceEpoch(message.updatedAt!))}'
-                          : date.DateFormat.Hm().format(
-                              DateTime.fromMillisecondsSinceEpoch(
-                                  message.updatedAt!))
-                      : '',
-                  style: currentUserIsAuthor
-                      ? InheritedChatTheme.of(context)
-                          .theme
-                          .timeSentMessageTextStyle
-                      : InheritedChatTheme.of(context)
-                          .theme
-                          .timeRecieveMessageTextStyle),
+                message.updatedAt != null
+                    ? message.status == types.Status.seen &&
+                            showTimeSeenMessage == true
+                        ? 'Seen at ${date.DateFormat("h:mma").format(DateTime.fromMillisecondsSinceEpoch(message.updatedAt!))}'
+                        : date.DateFormat('h:mma').format(
+                            DateTime.fromMillisecondsSinceEpoch(
+                              message.updatedAt!,
+                            ),
+                          )
+                    : '',
+                style: currentUserIsAuthor
+                    ? InheritedChatTheme.of(context)
+                        .theme
+                        .timeSentMessageTextStyle
+                    : InheritedChatTheme.of(context)
+                        .theme
+                        .timeRecieveMessageTextStyle,
+              ),
             ),
           )
         : const SizedBox.shrink();
@@ -339,7 +349,7 @@ class Message extends StatelessWidget {
                     ),
                 ],
               ),
-              timeMessageWidget
+              timeMessageWidget,
             ],
           ),
         ),

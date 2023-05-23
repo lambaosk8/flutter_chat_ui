@@ -93,6 +93,7 @@ class Chat extends StatefulWidget {
     this.userAgent,
     this.useTopSafeAreaInset,
     this.videoMessageBuilder,
+    this.showTimeSeenMessage,
   });
 
   /// See [Message.audioMessageBuilder].
@@ -199,6 +200,9 @@ class Chat extends StatefulWidget {
 
   /// See [ChatList.isLastPage].
   final bool? isLastPage;
+
+  /// Show time seen message.
+  final bool? showTimeSeenMessage;
 
   /// See [ChatList.keyboardDismissBehavior].
   final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
@@ -585,6 +589,7 @@ class ChatState extends State<Chat> {
           usePreviewData: widget.usePreviewData,
           userAgent: widget.userAgent,
           videoMessageBuilder: widget.videoMessageBuilder,
+          showTimeSeenMessage: widget.showTimeSeenMessage,
         );
       }
 
