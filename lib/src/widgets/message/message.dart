@@ -335,17 +335,6 @@ class Message extends StatelessWidget {
                       padding: InheritedChatTheme.of(context)
                           .theme
                           .statusIconPadding,
-                      /* child: true
-                          ? GestureDetector(
-                              onLongPress: () =>
-                                  onMessageStatusLongPress?.call(context, message),
-                              onTap: () =>
-                                  onMessageStatusTap?.call(context, message),
-                              child: customStatusBuilder != null
-                                  ? customStatusBuilder!(message, context: context)
-                                  : MessageStatus(status: message.status),
-                            )
-                          : null, */
                     ),
                 ],
               ),
@@ -375,12 +364,20 @@ class Message extends StatelessWidget {
   ) =>
       bubbleBuilder != null
           ? bubbleBuilder!(
-              _messageBuilder(),
+              _messageBuilder(
+                message,
+                currentUserIsAuthor,
+                context,
+              ),
               message: message,
               nextMessageInGroup: roundBorder,
             )
           : enlargeEmojis && hideBackgroundOnEmojiMessages
-              ? _messageBuilder()
+              ? _messageBuilder(
+                  message,
+                  currentUserIsAuthor,
+                  context,
+                )
               : Container(
                   decoration: BoxDecoration(
                     borderRadius: borderRadius,
@@ -391,11 +388,93 @@ class Message extends StatelessWidget {
                   ),
                   child: ClipRRect(
                     borderRadius: borderRadius,
-                    child: _messageBuilder(),
+                    child: _messageBuilder(
+                      message,
+                      currentUserIsAuthor,
+                      context,
+                    ),
                   ),
                 );
 
-  Widget _messageBuilder() {
+  Widget _fwMessageBuilder(
+    types.Message message,
+    bool currentUserIsAuthor,
+    BuildContext context,
+  ) {
+    var fwMessage = types.Message.fromJson(message.metadata!['forwardMsg']);
+    fwMessage = fwMessage.copyWith(
+      author: fwMessage.author.copyWith(id: message.metadata!['authorId']),
+    );
+    final style = currentUserIsAuthor
+        ? InheritedChatTheme.of(context).theme.sentMessageBodyCodeTextStyle
+        : InheritedChatTheme.of(context).theme.receivedMessageBodyCodeTextStyle;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          stops: const [0.01, 0.01],
+          colors: [
+            const Color(0XFF747D89),
+            currentUserIsAuthor ? const Color(0xff141414) : Colors.white,
+          ],
+        ),
+        borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Text(
+                  'Forwarded Message',
+                  style: style?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4.0),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Text(
+                  '${message.metadata!['creator']}',
+                  style: style?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4.0),
+              Container(
+                constraints: BoxConstraints(
+                  maxWidth: (messageWidth - 35.0),
+                ),
+                child: _messageBuilder(
+                  fwMessage,
+                  currentUserIsAuthor,
+                  context,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _messageBuilder(
+    types.Message message,
+    bool currentUserIsAuthor,
+    BuildContext context,
+  ) {
+    if (message.metadata != null && message.metadata!['forwardMsg'] != null) {
+      return _fwMessageBuilder(message, currentUserIsAuthor, context);
+    }
+
     switch (message.type) {
       case types.MessageType.audio:
         final audioMessage = message as types.AudioMessage;
