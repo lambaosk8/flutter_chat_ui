@@ -314,7 +314,7 @@ class TextMessageText extends StatelessWidget {
 @immutable
 class TextMessageOptions {
   const TextMessageOptions({
-    this.isTextSelectable = true,
+    this.isTextSelectable = false,
     this.onLinkPressed,
     this.openOnPreviewImageTap = false,
     this.openOnPreviewTitleTap = false,
