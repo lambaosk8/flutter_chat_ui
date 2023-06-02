@@ -291,43 +291,47 @@ class Message extends StatelessWidget {
                     constraints: BoxConstraints(
                       maxWidth: messageWidth.toDouble(),
                     ),
-                    child: Column(
-                      crossAxisAlignment: currentUserIsAuthor
-                          ? CrossAxisAlignment.end
-                          : CrossAxisAlignment.start,
-                      children: [
-                        GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onDoubleTap: () =>
-                              onMessageDoubleTap?.call(context, message),
-                          onLongPress: () =>
-                              onMessageLongPress?.call(context, message),
-                          onTap: () => onMessageTap?.call(context, message),
-                          child: onMessageVisibilityChanged != null
-                              ? VisibilityDetector(
-                                  key: Key(message.id),
-                                  onVisibilityChanged: (visibilityInfo) =>
-                                      onMessageVisibilityChanged!(
-                                    message,
-                                    visibilityInfo.visibleFraction > 0.1,
-                                  ),
-                                  child: _bubbleBuilder(
+                    child: Opacity(
+                      opacity: message.status == types.Status.error ? 0.3 : 1.0,
+                      child: Column(
+                        crossAxisAlignment: currentUserIsAuthor
+                            ? CrossAxisAlignment.end
+                            : CrossAxisAlignment.start,
+                        children: [
+                          GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onDoubleTap: () =>
+                                onMessageDoubleTap?.call(context, message),
+                            onLongPress: () =>
+                                onMessageLongPress?.call(context, message),
+                            onTap: () => onMessageTap?.call(context, message),
+                            child: onMessageVisibilityChanged != null
+                                ? VisibilityDetector(
+                                    key: Key(message.id),
+                                    onVisibilityChanged: (visibilityInfo) =>
+                                        onMessageVisibilityChanged!(
+                                      message,
+                                      visibilityInfo.visibleFraction > 0.1,
+                                    ),
+                                    child: _bubbleBuilder(
+                                      context,
+                                      borderRadius.resolve(
+                                        Directionality.of(context),
+                                      ),
+                                      currentUserIsAuthor,
+                                      enlargeEmojis,
+                                    ),
+                                  )
+                                : _bubbleBuilder(
                                     context,
                                     borderRadius
                                         .resolve(Directionality.of(context)),
                                     currentUserIsAuthor,
                                     enlargeEmojis,
                                   ),
-                                )
-                              : _bubbleBuilder(
-                                  context,
-                                  borderRadius
-                                      .resolve(Directionality.of(context)),
-                                  currentUserIsAuthor,
-                                  enlargeEmojis,
-                                ),
-                        ),
-                      ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   if (currentUserIsAuthor)
@@ -335,6 +339,13 @@ class Message extends StatelessWidget {
                       padding: InheritedChatTheme.of(context)
                           .theme
                           .statusIconPadding,
+                      child: message.status == types.Status.error
+                          ? const Icon(
+                              Icons.error_sharp,
+                              color: Color(0xffE30000),
+                              size: 16.0,
+                            )
+                          : const SizedBox.shrink(),
                     ),
                 ],
               ),
