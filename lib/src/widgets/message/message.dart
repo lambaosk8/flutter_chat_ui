@@ -416,63 +416,74 @@ class Message extends StatelessWidget {
     fwMessage = fwMessage.copyWith(
       author: fwMessage.author.copyWith(id: message.metadata!['authorId']),
     );
+    fwMessage.metadata!['isForwardMsg'] = true;
     final style = currentUserIsAuthor
         ? InheritedChatTheme.of(context).theme.sentMessageBodyCodeTextStyle
         : InheritedChatTheme.of(context).theme.receivedMessageBodyCodeTextStyle;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          stops: const [0.01, 0.01],
-          colors: [
-            const Color(0XFF747D89),
-            currentUserIsAuthor ? const Color(0xff141414) : Colors.white,
-          ],
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(4.0),
+          color: currentUserIsAuthor
+              ? const Color(0xff747D89)
+              : const Color(0xffDFE4EE),
         ),
-        borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Column(
+        padding: const EdgeInsets.only(left: 3.0),
+        child: Container(
+          padding: const EdgeInsets.only(left: 8.0),
+          decoration: BoxDecoration(
+            borderRadius: const BorderRadius.only(
+              topRight: Radius.circular(4.0),
+              bottomRight: Radius.circular(4.0),
+            ),
+            color: currentUserIsAuthor
+                ? const Color(0xff141414)
+                : const Color(0xffffffff),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Text(
-                  'Forwarded Message',
-                  style: style?.copyWith(
-                    fontWeight: FontWeight.w600,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text(
+                      'Forwarded Message',
+                      style: style?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 4.0),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Text(
-                  '${message.metadata!['creator']}',
-                  style: style?.copyWith(
-                    fontWeight: FontWeight.w600,
+                  const SizedBox(height: 4.0),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text(
+                      '${message.metadata!['creator']}',
+                      style: style?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 4.0),
-              Container(
-                constraints: BoxConstraints(
-                  maxWidth: (messageWidth - 35.0),
-                ),
-                child: _messageBuilder(
-                  fwMessage,
-                  currentUserIsAuthor,
-                  context,
-                ),
+                  const SizedBox(height: 4.0),
+                  Container(
+                    constraints: BoxConstraints(
+                      maxWidth: (messageWidth - 35.0),
+                    ),
+                    child: _messageBuilder(
+                      fwMessage,
+                      currentUserIsAuthor,
+                      context,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }
