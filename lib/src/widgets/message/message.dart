@@ -452,7 +452,7 @@ class Message extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Text(
-                      'Forwarded Message',
+                      'Forwarded message',
                       style: style?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
