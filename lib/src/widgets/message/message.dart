@@ -420,7 +420,11 @@ class Message extends StatelessWidget {
     final style = currentUserIsAuthor
         ? InheritedChatTheme.of(context).theme.sentMessageBodyCodeTextStyle
         : InheritedChatTheme.of(context).theme.receivedMessageBodyCodeTextStyle;
-
+    const maxLengthNameCreator = 30;
+    final messageCreator = message.metadata!['creator'].length >=
+            maxLengthNameCreator
+        ? ('${message.metadata!['creator'].substring(0, maxLengthNameCreator)}...')
+        : '${message.metadata!['creator']}';
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
       child: Container(
@@ -462,10 +466,12 @@ class Message extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Text(
-                      '${message.metadata!['creator']}',
+                      messageCreator,
                       style: style?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                   ),
                   const SizedBox(height: 4.0),
