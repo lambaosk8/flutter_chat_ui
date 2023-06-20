@@ -72,6 +72,7 @@ class Chat extends StatefulWidget {
     this.onEndReachedThreshold,
     this.onMessageDoubleTap,
     this.onMessageLongPress,
+    this.onMessageTapDown,
     this.onMessageStatusLongPress,
     this.onMessageStatusTap,
     this.onMessageTap,
@@ -242,6 +243,10 @@ class Chat extends StatefulWidget {
 
   /// See [Message.onMessageLongPress].
   final void Function(BuildContext context, types.Message)? onMessageLongPress;
+
+   /// See [Message.onMessageTapDown].
+  final void Function(TapDownDetails )? onMessageTapDown;
+
 
   /// See [Message.onMessageStatusLongPress].
   final void Function(BuildContext context, types.Message)?
@@ -549,7 +554,8 @@ class ChatState extends State<Chat> {
                 ? min(constraints.maxWidth * 0.72, 440).floor()
                 : min(constraints.maxWidth * 0.78, 440).floor();
 
-        messageWidget = Message(
+        messageWidget = 
+        Message(
           audioMessageBuilder: widget.audioMessageBuilder,
           avatarBuilder: widget.avatarBuilder,
           bubbleBuilder: widget.bubbleBuilder,
@@ -567,6 +573,7 @@ class ChatState extends State<Chat> {
           onAvatarTap: widget.onAvatarTap,
           onMessageDoubleTap: widget.onMessageDoubleTap,
           onMessageLongPress: widget.onMessageLongPress,
+          onMessageTapDown: widget.onMessageTapDown,
           onMessageStatusLongPress: widget.onMessageStatusLongPress,
           onMessageStatusTap: widget.onMessageStatusTap,
           onMessageTap: (context, tappedMessage) {
@@ -574,7 +581,7 @@ class ChatState extends State<Chat> {
                 widget.disableImageGallery != true) {
               _onImagePressed(tappedMessage);
             }
-
+        
             widget.onMessageTap?.call(context, tappedMessage);
           },
           onMessageVisibilityChanged: widget.onMessageVisibilityChanged,

@@ -38,6 +38,7 @@ class Message extends StatelessWidget {
     this.onAvatarTap,
     this.onMessageDoubleTap,
     this.onMessageLongPress,
+    this.onMessageTapDown,
     this.onMessageStatusLongPress,
     this.onMessageStatusTap,
     this.onMessageTap,
@@ -124,6 +125,9 @@ class Message extends StatelessWidget {
 
   /// Called when user makes a long press on any message.
   final void Function(BuildContext context, types.Message)? onMessageLongPress;
+
+  /// Called when user makes a long press on any message.
+  final void Function(TapDownDetails)? onMessageTapDown;
 
   /// Called when user makes a long press on status icon in any message.
   final void Function(BuildContext context, types.Message)?
@@ -287,50 +291,57 @@ class Message extends StatelessWidget {
                     : TextDirection.ltr,
                 children: [
                   if (!currentUserIsAuthor && showUserAvatars) _avatarBuilder(),
-                  ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth: messageWidth.toDouble(),
-                    ),
-                    child: Opacity(
-                      opacity: message.status == types.Status.error ? 0.3 : 1.0,
-                      child: Column(
-                        crossAxisAlignment: currentUserIsAuthor
-                            ? CrossAxisAlignment.end
-                            : CrossAxisAlignment.start,
-                        children: [
-                          GestureDetector(
-                            behavior: HitTestBehavior.opaque,
-                            onDoubleTap: () =>
-                                onMessageDoubleTap?.call(context, message),
-                            onLongPress: () =>
-                                onMessageLongPress?.call(context, message),
-                            onTap: () => onMessageTap?.call(context, message),
-                            child: onMessageVisibilityChanged != null
-                                ? VisibilityDetector(
-                                    key: Key(message.id),
-                                    onVisibilityChanged: (visibilityInfo) =>
-                                        onMessageVisibilityChanged!(
-                                      message,
-                                      visibilityInfo.visibleFraction > 0.1,
-                                    ),
-                                    child: _bubbleBuilder(
-                                      context,
-                                      borderRadius.resolve(
-                                        Directionality.of(context),
+                  LayoutBuilder(
+                    builder: (context, constraints) => ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: messageWidth.toDouble(),
+                      ),
+                      child: Opacity(
+                        opacity:
+                            message.status == types.Status.error ? 0.3 : 1.0,
+                        child: Column(
+                          crossAxisAlignment: currentUserIsAuthor
+                              ? CrossAxisAlignment.end
+                              : CrossAxisAlignment.start,
+                          children: [
+                            GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onDoubleTap: () =>
+                                  onMessageDoubleTap?.call(context, message),
+                              onLongPress: () => onMessageLongPress?.call(
+                                context,
+                                message,
+                              ),
+                              onTapDown: (postition) =>
+                                  onMessageTapDown?.call(postition),
+                              onTap: () => onMessageTap?.call(context, message),
+                              child: onMessageVisibilityChanged != null
+                                  ? VisibilityDetector(
+                                      key: Key(message.id),
+                                      onVisibilityChanged: (visibilityInfo) =>
+                                          onMessageVisibilityChanged!(
+                                        message,
+                                        visibilityInfo.visibleFraction > 0.1,
                                       ),
+                                      child: _bubbleBuilder(
+                                        context,
+                                        borderRadius.resolve(
+                                          Directionality.of(context),
+                                        ),
+                                        currentUserIsAuthor,
+                                        enlargeEmojis,
+                                      ),
+                                    )
+                                  : _bubbleBuilder(
+                                      context,
+                                      borderRadius
+                                          .resolve(Directionality.of(context)),
                                       currentUserIsAuthor,
                                       enlargeEmojis,
                                     ),
-                                  )
-                                : _bubbleBuilder(
-                                    context,
-                                    borderRadius
-                                        .resolve(Directionality.of(context)),
-                                    currentUserIsAuthor,
-                                    enlargeEmojis,
-                                  ),
-                          ),
-                        ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -412,84 +423,100 @@ class Message extends StatelessWidget {
     bool currentUserIsAuthor,
     BuildContext context,
   ) {
-    var fwMessage = types.Message.fromJson(message.metadata!['forwardMsg']);
-    fwMessage = fwMessage.copyWith(
-      author: fwMessage.author.copyWith(id: message.metadata!['authorId']),
-    );
+    final fwMessage = types.Message.fromJson(message.metadata!['forwardMsg']);
+    final user = InheritedUser.of(context).user;
+
     fwMessage.metadata!['isForwardMsg'] = true;
     final style = currentUserIsAuthor
         ? InheritedChatTheme.of(context).theme.sentMessageBodyCodeTextStyle
         : InheritedChatTheme.of(context).theme.receivedMessageBodyCodeTextStyle;
     const maxLengthNameCreator = 30;
-    final messageCreator = message.metadata!['creator'].length >=
-            maxLengthNameCreator
-        ? ('${message.metadata!['creator'].substring(0, maxLengthNameCreator)}...')
-        : '${message.metadata!['creator']}';
+    final messageCreator = message.metadata!['creator'] == null
+        ? ''
+        : message.metadata!['creator'].length >= maxLengthNameCreator
+            ? ('${message.metadata!['creator'].substring(0, maxLengthNameCreator)}...')
+            : '${message.metadata!['creator']}';
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(4.0),
-          color: currentUserIsAuthor
-              ? const Color(0xff747D89)
-              : const Color(0xffDFE4EE),
-        ),
-        padding: const EdgeInsets.only(left: 3.0),
-        child: Container(
-          padding: const EdgeInsets.only(left: 8.0),
-          decoration: BoxDecoration(
-            borderRadius: const BorderRadius.only(
-              topRight: Radius.circular(4.0),
-              bottomRight: Radius.circular(4.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(4.0),
+              color: currentUserIsAuthor
+                  ? const Color(0xff747D89)
+                  : const Color(0xffDFE4EE),
             ),
-            color: currentUserIsAuthor
-                ? const Color(0xff141414)
-                : const Color(0xffffffff),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Column(
+            padding: const EdgeInsets.only(left: 3.0),
+            child: Container(
+              padding: const EdgeInsets.only(left: 8.0),
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(4.0),
+                  bottomRight: Radius.circular(4.0),
+                ),
+                color: currentUserIsAuthor
+                    ? const Color(0xff141414)
+                    : const Color(0xffffffff),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text(
-                      'Forwarded message',
-                      style: style?.copyWith(
-                        fontWeight: FontWeight.w600,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Text(
+                          'Forwarded message',
+                          style: style?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 4.0),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text(
-                      messageCreator,
-                      style: style?.copyWith(
-                        fontWeight: FontWeight.w600,
+                      const SizedBox(height: 4.0),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Text(
+                          fwMessage.author.id == user.id
+                              ? 'You'
+                              : messageCreator,
+                          style: style?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
                       ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                    ),
-                  ),
-                  const SizedBox(height: 4.0),
-                  Container(
-                    constraints: BoxConstraints(
-                      maxWidth: (messageWidth - 35.0),
-                    ),
-                    child: _messageBuilder(
-                      fwMessage,
-                      currentUserIsAuthor,
-                      context,
-                    ),
+                      const SizedBox(height: 4.0),
+                      Container(
+                        constraints: BoxConstraints(
+                          maxWidth: (messageWidth - 35.0),
+                        ),
+                        child: _messageBuilder(
+                          fwMessage.copyWith(
+                            author: fwMessage.author
+                                .copyWith(id: message.metadata!['authorId']),
+                          ),
+                          currentUserIsAuthor,
+                          context,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
-        ),
+          if (message.metadata != null &&
+              message.metadata!['msg'] != null &&
+              message.metadata!['msg'].isNotEmpty)
+            Container(padding: EdgeInsets.all(8.0),
+            child: TextMessageText(bodyTextStyle: style!, text: message.metadata!['msg']),
+            ),
+        ],
       ),
     );
   }
