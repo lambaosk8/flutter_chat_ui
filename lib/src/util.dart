@@ -114,6 +114,7 @@ List<Object> calculateChatMessages(
   String? lastReadMessageId,
   required bool showUserNames,
   DateFormat? timeFormat,
+  double? messageSpacerHeight,
 }) {
   final chatMessages = <Object>[];
   final gallery = <PreviewImage>[];
@@ -217,7 +218,7 @@ List<Object> calculateChatMessages(
       chatMessages.insert(
         0,
         MessageSpacer(
-          height: 12,
+          height: nextMessageSameAuthor ? messageSpacerHeight!/2 : messageSpacerHeight!,
           id: message.id,
         ),
       );

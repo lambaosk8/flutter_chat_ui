@@ -96,6 +96,7 @@ class Chat extends StatefulWidget {
     this.useTopSafeAreaInset,
     this.videoMessageBuilder,
     this.showTimeSeenMessage,
+    this.messageSpacerHeight = 16.0,
   });
 
   /// See [Message.audioMessageBuilder].
@@ -205,6 +206,9 @@ class Chat extends StatefulWidget {
 
   /// Show time seen message.
   final bool? showTimeSeenMessage;
+
+  /// Show time seen message.
+  final double? messageSpacerHeight;
 
   /// See [ChatList.keyboardDismissBehavior].
   final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
@@ -371,6 +375,7 @@ class ChatState extends State<Chat> {
         lastReadMessageId: widget.scrollToUnreadOptions.lastReadMessageId,
         showUserNames: widget.showUserNames,
         timeFormat: widget.timeFormat,
+        messageSpacerHeight: widget.messageSpacerHeight,
       );
 
       _chatMessages = result[0] as List<Object>;
