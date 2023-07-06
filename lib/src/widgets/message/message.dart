@@ -124,7 +124,8 @@ class Message extends StatelessWidget {
   final void Function(BuildContext context, types.Message)? onMessageDoubleTap;
 
   /// Called when user makes a long press on any message.
-  final void Function(BuildContext context, types.Message,int messageWidth)? onMessageLongPress;
+  final void Function(BuildContext context, types.Message, int messageWidth)?
+      onMessageLongPress;
 
   /// Called when user makes a long press on any message.
   final void Function(TapDownDetails)? onMessageTapDown;
@@ -514,8 +515,109 @@ class Message extends StatelessWidget {
           if (message.metadata != null &&
               message.metadata!['msg'] != null &&
               message.metadata!['msg'].isNotEmpty)
-            Container(padding: EdgeInsets.all(8.0),
-            child: TextMessageText(bodyTextStyle: style!, text: message.metadata!['msg']),
+            Container(
+              padding: const EdgeInsets.all(8.0),
+              child: TextMessageText(
+                bodyTextStyle: style!,
+                text: message.metadata!['msg'],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _replyMessageBuilder(
+    types.Message message,
+    bool currentUserIsAuthor,
+    BuildContext context,
+  ) {
+    final fwMessage = types.Message.fromJson(message.metadata!['replyMsg']);
+    final user = InheritedUser.of(context).user;
+
+    fwMessage.metadata!['isReplyMsg'] = true;
+    final style = currentUserIsAuthor
+        ? InheritedChatTheme.of(context).theme.sentMessageBodyCodeTextStyle
+        : InheritedChatTheme.of(context).theme.receivedMessageBodyCodeTextStyle;
+    const maxLengthNameCreator = 30;
+    final messageCreator = message.metadata!['creator'] == null
+        ? ''
+        : message.metadata!['creator'].length >= maxLengthNameCreator
+            ? ('${message.metadata!['creator'].substring(0, maxLengthNameCreator)}...')
+            : '${message.metadata!['creator']}';
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(4.0),
+              color: currentUserIsAuthor
+                  ? const Color(0xff747D89)
+                  : const Color(0xffDFE4EE),
+            ),
+            padding: const EdgeInsets.only(left: 3.0),
+            child: Container(
+              padding: const EdgeInsets.only(left: 8.0),
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(4.0),
+                  bottomRight: Radius.circular(4.0),
+                ),
+                color: currentUserIsAuthor
+                    ? const Color(0xff141414)
+                    : const Color(0xffffffff),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Text(
+                          fwMessage.author.id == user.id
+                              ? 'You'
+                              : messageCreator,
+                          style: style?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ),
+                      const SizedBox(height: 4.0),
+                      Container(
+                        constraints: BoxConstraints(
+                          maxWidth: (messageWidth - 35.0),
+                        ),
+                        child: _messageBuilder(
+                          fwMessage.copyWith(
+                            author: fwMessage.author
+                                .copyWith(id: message.metadata!['authorId']),
+                          ),
+                          currentUserIsAuthor,
+                          context,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (message.metadata != null &&
+              message.metadata!['msg'] != null &&
+              message.metadata!['msg'].isNotEmpty)
+            Container(
+              padding: const EdgeInsets.all(8.0),
+              child: TextMessageText(
+                bodyTextStyle: style!,
+                text: message.metadata!['msg'],
+              ),
             ),
         ],
       ),
@@ -530,7 +632,9 @@ class Message extends StatelessWidget {
     if (message.metadata != null && message.metadata!['forwardMsg'] != null) {
       return _fwMessageBuilder(message, currentUserIsAuthor, context);
     }
-
+    if (message.metadata != null && message.metadata!['replyMsg'] != null) {
+      return _replyMessageBuilder(message, currentUserIsAuthor, context);
+    }
     switch (message.type) {
       case types.MessageType.audio:
         final audioMessage = message as types.AudioMessage;
