@@ -98,6 +98,7 @@ class Chat extends StatefulWidget {
     this.videoMessageBuilder,
     this.showTimeSeenMessage,
     this.messageSpacerHeight = 16.0,
+    this.emptyMessageBuilder,
   });
 
   /// See [Message.audioMessageBuilder].
@@ -248,11 +249,11 @@ class Chat extends StatefulWidget {
   final void Function(BuildContext context, types.Message)? onMessageDoubleTap;
 
   /// See [Message.onMessageLongPress].
-  final void Function(BuildContext context, types.Message,int messageWidth)? onMessageLongPress;
+  final void Function(BuildContext context, types.Message, int messageWidth)?
+      onMessageLongPress;
 
-   /// See [Message.onMessageTapDown].
-  final void Function(TapDownDetails )? onMessageTapDown;
-
+  /// See [Message.onMessageTapDown].
+  final void Function(TapDownDetails)? onMessageTapDown;
 
   /// See [Message.onMessageStatusLongPress].
   final void Function(BuildContext context, types.Message)?
@@ -335,6 +336,8 @@ class Chat extends StatefulWidget {
   final Widget Function(types.VideoMessage, {required int messageWidth})?
       videoMessageBuilder;
 
+  /// Call when never have message before.
+  final Widget? emptyMessageBuilder;
   @override
   State<Chat> createState() => ChatState();
 }
@@ -432,7 +435,8 @@ class ChatState extends State<Chat> {
                       Flexible(
                         child: widget.messages.isEmpty
                             ? SizedBox.expand(
-                                child: _emptyStateBuilder(),
+                                child: widget.emptyMessageBuilder ??
+                                    _emptyStateBuilder(),
                               )
                             : GestureDetector(
                                 onTap: () {
@@ -568,8 +572,7 @@ class ChatState extends State<Chat> {
                 ? min(constraints.maxWidth * 0.72, 440).floor()
                 : min(constraints.maxWidth * 0.78, 440).floor();
 
-        messageWidget = 
-        Message(
+        messageWidget = Message(
           audioMessageBuilder: widget.audioMessageBuilder,
           avatarBuilder: widget.avatarBuilder,
           bubbleBuilder: widget.bubbleBuilder,
@@ -595,7 +598,7 @@ class ChatState extends State<Chat> {
                 widget.disableImageGallery != true) {
               _onImagePressed(tappedMessage);
             }
-        
+
             widget.onMessageTap?.call(context, tappedMessage);
           },
           onMessageVisibilityChanged: widget.onMessageVisibilityChanged,
