@@ -460,7 +460,6 @@ class Message extends StatelessWidget {
                           maxLines: 1,
                         ),
                       ),
-                      const SizedBox(height: 4.0),
                       Container(
                         constraints: BoxConstraints(
                           maxWidth: (messageWidth - 35.0),
@@ -500,7 +499,6 @@ class Message extends StatelessWidget {
     BuildContext context,
   ) {
     final replyMessage = types.Message.fromJson(message.metadata!['replyMsg']);
-    final user = InheritedUser.of(context).user;
 
     replyMessage.metadata!['isReplyMsg'] = true;
     final style = currentUserIsAuthor
