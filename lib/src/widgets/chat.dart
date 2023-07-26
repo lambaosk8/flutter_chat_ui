@@ -306,13 +306,13 @@ class Chat extends StatefulWidget {
 
   /// See [Message.replyMessageBuilder].
   final Widget Function(
-    types.TextMessage, {
+    types.Message, {
     required int messageWidth,
   })? replyMessageBuilder;
 
   /// See [Message.forwardMessageBuilder].
   final Widget Function(
-    types.TextMessage, {
+    types.Message, {
     required int messageWidth,
   })? forwardMessageBuilder;
 
