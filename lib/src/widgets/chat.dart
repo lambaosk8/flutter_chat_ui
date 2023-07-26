@@ -99,6 +99,8 @@ class Chat extends StatefulWidget {
     this.showTimeSeenMessage,
     this.messageSpacerHeight = 16.0,
     this.emptyMessageBuilder,
+    this.replyMessageBuilder,
+    this.forwardMessageBuilder,
   });
 
   /// See [Message.audioMessageBuilder].
@@ -302,6 +304,18 @@ class Chat extends StatefulWidget {
     required bool showName,
   })? textMessageBuilder;
 
+  /// See [Message.replyMessageBuilder].
+  final Widget Function(
+    types.TextMessage, {
+    required int messageWidth,
+  })? replyMessageBuilder;
+
+  /// See [Message.forwardMessageBuilder].
+  final Widget Function(
+    types.TextMessage, {
+    required int messageWidth,
+  })? forwardMessageBuilder;
+
   /// See [Message.textMessageOptions].
   final TextMessageOptions textMessageOptions;
 
@@ -338,6 +352,7 @@ class Chat extends StatefulWidget {
 
   /// Call when never have message before.
   final Widget? emptyMessageBuilder;
+
   @override
   State<Chat> createState() => ChatState();
 }
@@ -614,6 +629,8 @@ class ChatState extends State<Chat> {
           userAgent: widget.userAgent,
           videoMessageBuilder: widget.videoMessageBuilder,
           showTimeSeenMessage: widget.showTimeSeenMessage,
+          replyMessageBuilder: widget.replyMessageBuilder,
+          forwardMessageBuilder: widget.forwardMessageBuilder,
         );
       }
 
