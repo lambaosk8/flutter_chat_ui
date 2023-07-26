@@ -56,6 +56,8 @@ class Message extends StatelessWidget {
     this.videoMessageBuilder,
     this.sideMarginValue = 12.0,
     this.showTimeSeenMessage,
+    this.forwardMessageBuilder,
+    this.replyMessageBuilder,
   });
 
   /// Build an audio message inside predefined bubble.
