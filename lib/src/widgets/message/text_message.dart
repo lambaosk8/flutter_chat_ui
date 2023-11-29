@@ -308,6 +308,7 @@ class TextMessageText extends StatelessWidget {
         style: bodyTextStyle,
         text: text,
         textWidthBasis: TextWidthBasis.longestLine,
+        textScaleFactor: MediaQuery.of(context).textScaleFactor,
       );
 }
 
