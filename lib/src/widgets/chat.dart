@@ -101,11 +101,11 @@ class Chat extends StatefulWidget {
     this.emptyMessageBuilder,
     this.replyMessageBuilder,
     this.forwardMessageBuilder,
+    this.onTapLinkCustomize,
   });
 
   /// See [Message.audioMessageBuilder].
-  final Widget Function(types.AudioMessage, {required int messageWidth})?
-      audioMessageBuilder;
+  final Widget Function(types.AudioMessage, {required int messageWidth})? audioMessageBuilder;
 
   /// See [Message.avatarBuilder].
   final Widget Function(String userId)? avatarBuilder;
@@ -135,8 +135,7 @@ class Chat extends StatefulWidget {
   final String Function(DateTime)? customDateHeaderText;
 
   /// See [Message.customMessageBuilder].
-  final Widget Function(types.CustomMessage, {required int messageWidth})?
-      customMessageBuilder;
+  final Widget Function(types.CustomMessage, {required int messageWidth})? customMessageBuilder;
 
   /// See [Message.customStatusBuilder].
   final Widget Function(types.Message message, {required BuildContext context})?
@@ -178,8 +177,7 @@ class Chat extends StatefulWidget {
   final Widget? emptyState;
 
   /// See [Message.fileMessageBuilder].
-  final Widget Function(types.FileMessage, {required int messageWidth})?
-      fileMessageBuilder;
+  final Widget Function(types.FileMessage, {required int messageWidth})? fileMessageBuilder;
 
   /// Time (in ms) between two messages when we will visually group them.
   /// Default value is 1 minute, 60000 ms. When time between two messages
@@ -196,8 +194,7 @@ class Chat extends StatefulWidget {
   final Map<String, String>? imageHeaders;
 
   /// See [Message.imageMessageBuilder].
-  final Widget Function(types.ImageMessage, {required int messageWidth})?
-      imageMessageBuilder;
+  final Widget Function(types.ImageMessage, {required int messageWidth})? imageMessageBuilder;
 
   /// See [Input.options].
   final InputOptions inputOptions;
@@ -251,15 +248,13 @@ class Chat extends StatefulWidget {
   final void Function(BuildContext context, types.Message)? onMessageDoubleTap;
 
   /// See [Message.onMessageLongPress].
-  final void Function(BuildContext context, types.Message, int messageWidth)?
-      onMessageLongPress;
+  final void Function(BuildContext context, types.Message, int messageWidth)? onMessageLongPress;
 
   /// See [Message.onMessageTapDown].
   final void Function(TapDownDetails)? onMessageTapDown;
 
   /// See [Message.onMessageStatusLongPress].
-  final void Function(BuildContext context, types.Message)?
-      onMessageStatusLongPress;
+  final void Function(BuildContext context, types.Message)? onMessageStatusLongPress;
 
   /// See [Message.onMessageStatusTap].
   final void Function(BuildContext context, types.Message)? onMessageStatusTap;
@@ -271,8 +266,7 @@ class Chat extends StatefulWidget {
   final void Function(types.Message, bool visible)? onMessageVisibilityChanged;
 
   /// See [Message.onPreviewDataFetched].
-  final void Function(types.TextMessage, types.PreviewData)?
-      onPreviewDataFetched;
+  final void Function(types.TextMessage, types.PreviewData)? onPreviewDataFetched;
 
   /// See [Input.onSendPressed].
   final void Function(types.PartialText) onSendPressed;
@@ -296,6 +290,9 @@ class Chat extends StatefulWidget {
 
   /// Builds a system message outside of any bubble.
   final Widget Function(types.SystemMessage)? systemMessageBuilder;
+
+  /// Build customize tap link.
+  final Function(String urlText)? onTapLinkCustomize;
 
   /// See [Message.textMessageBuilder].
   final Widget Function(
@@ -347,8 +344,7 @@ class Chat extends StatefulWidget {
   final bool? useTopSafeAreaInset;
 
   /// See [Message.videoMessageBuilder].
-  final Widget Function(types.VideoMessage, {required int messageWidth})?
-      videoMessageBuilder;
+  final Widget Function(types.VideoMessage, {required int messageWidth})? videoMessageBuilder;
 
   /// Call when never have message before.
   final Widget? emptyMessageBuilder;
@@ -428,8 +424,7 @@ class ChatState extends State<Chat> {
   }
 
   /// Scroll to the message with the specified [id].
-  void scrollToMessage(String id, {Duration? duration}) =>
-      _scrollController.scrollToIndex(
+  void scrollToMessage(String id, {Duration? duration}) => _scrollController.scrollToIndex(
         _autoScrollIndexById[id]!,
         duration: duration ?? scrollAnimationDuration,
       );
@@ -450,8 +445,7 @@ class ChatState extends State<Chat> {
                       Flexible(
                         child: widget.messages.isEmpty
                             ? SizedBox.expand(
-                                child: widget.emptyMessageBuilder ??
-                                    _emptyStateBuilder(),
+                                child: widget.emptyMessageBuilder ?? _emptyStateBuilder(),
                               )
                             : GestureDetector(
                                 onTap: () {
@@ -465,27 +459,21 @@ class ChatState extends State<Chat> {
                                   ) =>
                                       ChatList(
                                     bottomWidget: widget.listBottomWidget,
-                                    bubbleRtlAlignment:
-                                        widget.bubbleRtlAlignment!,
+                                    bubbleRtlAlignment: widget.bubbleRtlAlignment!,
                                     isLastPage: widget.isLastPage,
-                                    itemBuilder: (Object item, int? index) =>
-                                        _messageBuilder(
+                                    itemBuilder: (Object item, int? index) => _messageBuilder(
                                       item,
                                       constraints,
                                       index,
                                     ),
                                     items: _chatMessages,
-                                    keyboardDismissBehavior:
-                                        widget.keyboardDismissBehavior,
+                                    keyboardDismissBehavior: widget.keyboardDismissBehavior,
                                     onEndReached: widget.onEndReached,
-                                    onEndReachedThreshold:
-                                        widget.onEndReachedThreshold,
+                                    onEndReachedThreshold: widget.onEndReachedThreshold,
                                     scrollController: _scrollController,
                                     scrollPhysics: widget.scrollPhysics,
-                                    typingIndicatorOptions:
-                                        widget.typingIndicatorOptions,
-                                    useTopSafeAreaInset:
-                                        widget.useTopSafeAreaInset ?? isMobile,
+                                    typingIndicatorOptions: widget.typingIndicatorOptions,
+                                    useTopSafeAreaInset: widget.useTopSafeAreaInset ?? isMobile,
                                   ),
                                 ),
                               ),
@@ -579,13 +567,12 @@ class ChatState extends State<Chat> {
       final Widget messageWidget;
 
       if (message is types.SystemMessage) {
-        messageWidget = widget.systemMessageBuilder?.call(message) ??
-            SystemMessage(message: message.text);
+        messageWidget =
+            widget.systemMessageBuilder?.call(message) ?? SystemMessage(message: message.text);
       } else {
-        final messageWidth =
-            widget.showUserAvatars && message.author.id != widget.user.id
-                ? min(constraints.maxWidth * 0.72, 440).floor()
-                : min(constraints.maxWidth * 0.78, 440).floor();
+        final messageWidth = widget.showUserAvatars && message.author.id != widget.user.id
+            ? min(constraints.maxWidth * 0.72, 440).floor()
+            : min(constraints.maxWidth * 0.78, 440).floor();
 
         messageWidget = Message(
           audioMessageBuilder: widget.audioMessageBuilder,
@@ -609,8 +596,7 @@ class ChatState extends State<Chat> {
           onMessageStatusLongPress: widget.onMessageStatusLongPress,
           onMessageStatusTap: widget.onMessageStatusTap,
           onMessageTap: (context, tappedMessage) {
-            if (tappedMessage is types.ImageMessage &&
-                widget.disableImageGallery != true) {
+            if (tappedMessage is types.ImageMessage && widget.disableImageGallery != true) {
               _onImagePressed(tappedMessage);
             }
 
@@ -631,6 +617,7 @@ class ChatState extends State<Chat> {
           showTimeSeenMessage: widget.showTimeSeenMessage,
           replyMessageBuilder: widget.replyMessageBuilder,
           forwardMessageBuilder: widget.forwardMessageBuilder,
+          onTapLinkCustomize: widget.onTapLinkCustomize,
         );
       }
 

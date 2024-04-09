@@ -26,6 +26,7 @@ class TextMessage extends StatelessWidget {
     required this.showName,
     required this.usePreviewData,
     this.userAgent,
+    this.onTapLinkCustomize,
   });
 
   /// See [Message.emojiEnlargementBehavior].
@@ -42,8 +43,7 @@ class TextMessage extends StatelessWidget {
   final Widget Function(String userId)? nameBuilder;
 
   /// See [LinkPreview.onPreviewDataFetched].
-  final void Function(types.TextMessage, types.PreviewData)?
-      onPreviewDataFetched;
+  final void Function(types.TextMessage, types.PreviewData)? onPreviewDataFetched;
 
   /// Customisation options for the [TextMessage].
   final TextMessageOptions options;
@@ -57,11 +57,13 @@ class TextMessage extends StatelessWidget {
   /// User agent to fetch preview data with.
   final String? userAgent;
 
+  /// Build customize tap link.
+  final Function(String urlText)? onTapLinkCustomize;
+
   @override
   Widget build(BuildContext context) {
-    final enlargeEmojis =
-        emojiEnlargementBehavior != EmojiEnlargementBehavior.never &&
-            isConsistsOfEmojis(emojiEnlargementBehavior, message);
+    final enlargeEmojis = emojiEnlargementBehavior != EmojiEnlargementBehavior.never &&
+        isConsistsOfEmojis(emojiEnlargementBehavior, message);
     final theme = InheritedChatTheme.of(context).theme;
     final user = InheritedUser.of(context).user;
     final width = MediaQuery.of(context).size.width;
@@ -90,17 +92,11 @@ class TextMessage extends StatelessWidget {
     BuildContext context,
   ) {
     final linkDescriptionTextStyle = user.id == message.author.id
-        ? InheritedChatTheme.of(context)
-            .theme
-            .sentMessageLinkDescriptionTextStyle
-        : InheritedChatTheme.of(context)
-            .theme
-            .receivedMessageLinkDescriptionTextStyle;
+        ? InheritedChatTheme.of(context).theme.sentMessageLinkDescriptionTextStyle
+        : InheritedChatTheme.of(context).theme.receivedMessageLinkDescriptionTextStyle;
     final linkTitleTextStyle = user.id == message.author.id
         ? InheritedChatTheme.of(context).theme.sentMessageLinkTitleTextStyle
-        : InheritedChatTheme.of(context)
-            .theme
-            .receivedMessageLinkTitleTextStyle;
+        : InheritedChatTheme.of(context).theme.receivedMessageLinkTitleTextStyle;
 
     return LinkPreview(
       enableAnimation: true,
@@ -111,8 +107,7 @@ class TextMessage extends StatelessWidget {
       openOnPreviewImageTap: options.openOnPreviewImageTap,
       openOnPreviewTitleTap: options.openOnPreviewTitleTap,
       padding: EdgeInsets.symmetric(
-        horizontal:
-            InheritedChatTheme.of(context).theme.messageInsetsHorizontal,
+        horizontal: InheritedChatTheme.of(context).theme.messageInsetsHorizontal,
         vertical: InheritedChatTheme.of(context).theme.messageInsetsVertical,
       ),
       previewData: message.previewData,
@@ -154,9 +149,7 @@ class TextMessage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (showName)
-          nameBuilder?.call(message.author.id) ??
-              UserName(author: message.author),
+        if (showName) nameBuilder?.call(message.author.id) ?? UserName(author: message.author),
         if (enlargeEmojis)
           if (options.isTextSelectable)
             SelectableText(message.text, style: emojiTextStyle)
@@ -170,6 +163,7 @@ class TextMessage extends StatelessWidget {
             codeTextStyle: codeTextStyle,
             options: options,
             text: message.text,
+            onTapLinkCustomize: onTapLinkCustomize,
           ),
       ],
     );
@@ -188,6 +182,7 @@ class TextMessageText extends StatelessWidget {
     this.options = const TextMessageOptions(),
     this.overflow = TextOverflow.clip,
     required this.text,
+    this.onTapLinkCustomize,
   });
 
   /// Style to apply to anything that matches a link.
@@ -214,6 +209,8 @@ class TextMessageText extends StatelessWidget {
   /// Text that is shown as markdown.
   final String text;
 
+  /// Build customize tap link.
+  final Function(String urlText)? onTapLinkCustomize;
   @override
   Widget build(BuildContext context) => ParsedText(
         parse: [
@@ -232,26 +229,7 @@ class TextMessageText extends StatelessWidget {
                 ),
           ),
           MatchText(
-            onTap: (urlText) async {
-              final protocolIdentifierRegex = RegExp(
-                r'^((http|ftp|https):\/\/)',
-                caseSensitive: false,
-              );
-              if (!urlText.startsWith(protocolIdentifierRegex)) {
-                urlText = 'https://$urlText';
-              }
-              if (options.onLinkPressed != null) {
-                options.onLinkPressed!(urlText);
-              } else {
-                final url = Uri.tryParse(urlText);
-                if (url != null && await canLaunchUrl(url)) {
-                  await launchUrl(
-                    url,
-                    mode: LaunchMode.inAppWebView,
-                  );
-                }
-              }
-            },
+            onTap: (urlText) => onTapLinkCustomize?.call(urlText),
             pattern: regexLink,
             style: bodyLinkTextStyle ??
                 bodyTextStyle.copyWith(
@@ -260,8 +238,7 @@ class TextMessageText extends StatelessWidget {
           ),
           MatchText(
             pattern: PatternStyle.bold.pattern,
-            style: boldTextStyle ??
-                bodyTextStyle.merge(PatternStyle.bold.textStyle),
+            style: boldTextStyle ?? bodyTextStyle.merge(PatternStyle.bold.textStyle),
             renderText: ({required String str, required String pattern}) => {
               'display': str.replaceAll(
                 PatternStyle.bold.from,
@@ -291,8 +268,7 @@ class TextMessageText extends StatelessWidget {
           ),
           MatchText(
             pattern: PatternStyle.code.pattern,
-            style: codeTextStyle ??
-                bodyTextStyle.merge(PatternStyle.code.textStyle),
+            style: codeTextStyle ?? bodyTextStyle.merge(PatternStyle.code.textStyle),
             renderText: ({required String str, required String pattern}) => {
               'display': str.replaceAll(
                 PatternStyle.code.from,
