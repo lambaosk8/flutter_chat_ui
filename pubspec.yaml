@@ -20,7 +20,7 @@ dependencies:
   flutter_parsed_text:
     git:
       url: https://github.com/xomad-mobile/flutter_parsed_text.git
-      ref: xomad_customization
+      ref: xomad_customization_text_scaler
   intl: ^0.19.0
   meta: ^1.8.0
   photo_view: ^0.14.0
