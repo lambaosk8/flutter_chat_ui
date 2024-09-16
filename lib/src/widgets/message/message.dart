@@ -4,6 +4,7 @@ import 'package:intl/intl.dart' as date;
 import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../models/bubble_rtl_alignment.dart';
+import '../../models/council_enum.dart';
 import '../../models/emoji_enlargement_behavior.dart';
 import '../../util.dart';
 import '../state/inherited_chat_theme.dart';
@@ -165,7 +166,7 @@ class Message extends StatelessWidget {
   /// Show user avatars for received messages. Useful for a group chat.
   final bool showUserAvatars;
 
-  /// Side padding between Avatar - Left/Right Size
+  /// Side padding between Avatar - Left/Right Size.
   final double? sideMarginValue;
 
   /// Build a text message inside predefined bubble.
@@ -209,6 +210,18 @@ class Message extends StatelessWidget {
           message as types.TextMessage,
         );
     final messageBorderRadius = InheritedChatTheme.of(context).theme.messageBorderRadius;
+    final council = Council.fromKey(message.metadata!['council']);
+
+    final timeMessage = message.updatedAt != null
+        ? message.status == types.Status.seen && showTimeSeenMessage == true
+            ? 'Seen at ${date.DateFormat("h:mma").format(DateTime.fromMillisecondsSinceEpoch(message.updatedAt!))}'
+            : date.DateFormat('h:mma').format(
+                DateTime.fromMillisecondsSinceEpoch(
+                  message.updatedAt!,
+                ),
+              )
+        : '';
+    final messageStatus = timeMessage + (council == Council.theplug ? '' : ' . ${council.title}');
     final borderRadius = bubbleRtlAlignment == BubbleRtlAlignment.left
         ? BorderRadiusDirectional.only(
             bottomEnd: Radius.circular(
@@ -241,15 +254,7 @@ class Message extends StatelessWidget {
             child: Align(
               alignment: currentUserIsAuthor ? Alignment.centerRight : Alignment.centerLeft,
               child: Text(
-                message.updatedAt != null
-                    ? message.status == types.Status.seen && showTimeSeenMessage == true
-                        ? 'Seen at ${date.DateFormat("h:mma").format(DateTime.fromMillisecondsSinceEpoch(message.updatedAt!))}'
-                        : date.DateFormat('h:mma').format(
-                            DateTime.fromMillisecondsSinceEpoch(
-                              message.updatedAt!,
-                            ),
-                          )
-                    : '',
+                messageStatus,
                 style: currentUserIsAuthor
                     ? InheritedChatTheme.of(context).theme.timeSentMessageTextStyle
                     : InheritedChatTheme.of(context).theme.timeRecieveMessageTextStyle,
@@ -667,4 +672,3 @@ class Message extends StatelessWidget {
     }
   }
 }
-

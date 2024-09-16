@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart'
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:intl/intl.dart';
 
+import 'models/council_header.dart';
 import 'models/date_header.dart';
 import 'models/emoji_enlargement_behavior.dart';
 import 'models/message_spacer.dart';
@@ -135,6 +136,7 @@ List<Object> calculateChatMessages(
     var nextMessageDifferentDay = false;
     var nextMessageInGroup = false;
     var showName = false;
+    var isShowCouncil = false;
 
     if (showUserNames) {
       final previousMessage = isFirst ? null : messages[i + 1];
@@ -178,7 +180,9 @@ List<Object> calculateChatMessages(
           message.id != lastReadMessageId &&
           nextMessage.createdAt! - message.createdAt! <= groupMessagesThreshold;
     }
-
+    if (message.metadata != null && nextMessage?.metadata != null) {
+      isShowCouncil = message.metadata!['council'] != nextMessage!.metadata!['council'];
+    }
     if (isFirst && messageHasCreatedAt) {
       chatMessages.insert(
         0,
@@ -251,7 +255,9 @@ List<Object> calculateChatMessages(
         ),
       );
     }
-
+    if (isShowCouncil) {
+      chatMessages.insert(0, CouncilHeader(council: nextMessage!.metadata!['council']));
+    }
     if (message.id == lastReadMessageId && !isLast) {
       chatMessages.insert(
         0,
