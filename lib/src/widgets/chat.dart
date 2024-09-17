@@ -9,6 +9,7 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import '../chat_l10n.dart';
 import '../chat_theme.dart';
 import '../models/bubble_rtl_alignment.dart';
+import '../models/council_header.dart';
 import '../models/date_header.dart';
 import '../models/emoji_enlargement_behavior.dart';
 import '../models/message_spacer.dart';
@@ -31,78 +32,78 @@ import 'unread_header.dart';
 /// it should be full screen, set [SafeArea]'s `bottom` to `false`.
 class Chat extends StatefulWidget {
   /// Creates a chat widget.
-  const Chat({
-    super.key,
-    this.audioMessageBuilder,
-    this.avatarBuilder,
-    this.bubbleBuilder,
-    this.bubbleRtlAlignment = BubbleRtlAlignment.right,
-    this.customBottomWidget,
-    this.customDateHeaderText,
-    this.customMessageBuilder,
-    this.customStatusBuilder,
-    this.dateFormat,
-    this.dateHeaderBuilder,
-    this.dateHeaderThreshold = 900000,
-    this.dateIsUtc = false,
-    this.dateLocale,
-    this.disableImageGallery,
-    this.emojiEnlargementBehavior = EmojiEnlargementBehavior.multi,
-    this.emptyState,
-    this.fileMessageBuilder,
-    this.groupMessagesThreshold = 60000,
-    this.hideBackgroundOnEmojiMessages = true,
-    this.imageGalleryOptions = const ImageGalleryOptions(
-      maxScale: PhotoViewComputedScale.covered,
-      minScale: PhotoViewComputedScale.contained,
-    ),
-    this.imageHeaders,
-    this.imageMessageBuilder,
-    this.inputOptions = const InputOptions(),
-    this.isAttachmentUploading,
-    this.isLastPage,
-    this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
-    this.l10n = const ChatL10nEn(),
-    this.listBottomWidget,
-    required this.messages,
-    this.nameBuilder,
-    this.onAttachmentPressed,
-    this.onAvatarTap,
-    this.onBackgroundTap,
-    this.onEndReached,
-    this.onEndReachedThreshold,
-    this.onMessageDoubleTap,
-    this.onMessageLongPress,
-    this.onMessageTapDown,
-    this.onMessageStatusLongPress,
-    this.onMessageStatusTap,
-    this.onMessageTap,
-    this.onMessageVisibilityChanged,
-    this.onPreviewDataFetched,
-    required this.onSendPressed,
-    this.scrollController,
-    this.scrollPhysics,
-    this.scrollToUnreadOptions = const ScrollToUnreadOptions(),
-    this.showUserAvatars = false,
-    this.showUserNames = false,
-    this.systemMessageBuilder,
-    this.textMessageBuilder,
-    this.textMessageOptions = const TextMessageOptions(),
-    this.theme = const DefaultChatTheme(),
-    this.timeFormat,
-    this.typingIndicatorOptions = const TypingIndicatorOptions(),
-    this.usePreviewData = true,
-    required this.user,
-    this.userAgent,
-    this.useTopSafeAreaInset,
-    this.videoMessageBuilder,
-    this.showTimeSeenMessage,
-    this.messageSpacerHeight = 16.0,
-    this.emptyMessageBuilder,
-    this.replyMessageBuilder,
-    this.forwardMessageBuilder,
-    this.onTapLinkCustomize,
-  });
+  const Chat(
+      {super.key,
+      this.audioMessageBuilder,
+      this.avatarBuilder,
+      this.bubbleBuilder,
+      this.bubbleRtlAlignment = BubbleRtlAlignment.right,
+      this.customBottomWidget,
+      this.customDateHeaderText,
+      this.customMessageBuilder,
+      this.customStatusBuilder,
+      this.dateFormat,
+      this.dateHeaderBuilder,
+      this.dateHeaderThreshold = 900000,
+      this.dateIsUtc = false,
+      this.dateLocale,
+      this.disableImageGallery,
+      this.emojiEnlargementBehavior = EmojiEnlargementBehavior.multi,
+      this.emptyState,
+      this.fileMessageBuilder,
+      this.groupMessagesThreshold = 60000,
+      this.hideBackgroundOnEmojiMessages = true,
+      this.imageGalleryOptions = const ImageGalleryOptions(
+        maxScale: PhotoViewComputedScale.covered,
+        minScale: PhotoViewComputedScale.contained,
+      ),
+      this.imageHeaders,
+      this.imageMessageBuilder,
+      this.inputOptions = const InputOptions(),
+      this.isAttachmentUploading,
+      this.isLastPage,
+      this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
+      this.l10n = const ChatL10nEn(),
+      this.listBottomWidget,
+      required this.messages,
+      this.nameBuilder,
+      this.onAttachmentPressed,
+      this.onAvatarTap,
+      this.onBackgroundTap,
+      this.onEndReached,
+      this.onEndReachedThreshold,
+      this.onMessageDoubleTap,
+      this.onMessageLongPress,
+      this.onMessageTapDown,
+      this.onMessageStatusLongPress,
+      this.onMessageStatusTap,
+      this.onMessageTap,
+      this.onMessageVisibilityChanged,
+      this.onPreviewDataFetched,
+      required this.onSendPressed,
+      this.scrollController,
+      this.scrollPhysics,
+      this.scrollToUnreadOptions = const ScrollToUnreadOptions(),
+      this.showUserAvatars = false,
+      this.showUserNames = false,
+      this.systemMessageBuilder,
+      this.textMessageBuilder,
+      this.textMessageOptions = const TextMessageOptions(),
+      this.theme = const DefaultChatTheme(),
+      this.timeFormat,
+      this.typingIndicatorOptions = const TypingIndicatorOptions(),
+      this.usePreviewData = true,
+      required this.user,
+      this.userAgent,
+      this.useTopSafeAreaInset,
+      this.videoMessageBuilder,
+      this.showTimeSeenMessage,
+      this.messageSpacerHeight = 16.0,
+      this.emptyMessageBuilder,
+      this.replyMessageBuilder,
+      this.forwardMessageBuilder,
+      this.onTapLinkCustomize,
+      this.councilHeaderBuilder,});
 
   /// See [Message.audioMessageBuilder].
   final Widget Function(types.AudioMessage, {required int messageWidth})? audioMessageBuilder;
@@ -150,6 +151,9 @@ class Chat extends StatefulWidget {
 
   /// Custom date header builder gives ability to customize date header widget.
   final Widget Function(DateHeader)? dateHeaderBuilder;
+
+  /// Build council header widget.
+  final Widget Function(CouncilHeader)? councilHeaderBuilder;
 
   /// Time (in ms) between two messages when we will render a date header.
   /// Default value is 15 minutes, 900000 ms. When time between two messages
@@ -547,6 +551,8 @@ class ChatState extends State<Chat> {
               style: widget.theme.dateDividerTextStyle,
             ),
           );
+    } else if (object is CouncilHeader) {
+      return widget.councilHeaderBuilder?.call(object) ?? const SizedBox.shrink();
     } else if (object is MessageSpacer) {
       return SizedBox(
         height: object.height,
