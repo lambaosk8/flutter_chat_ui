@@ -181,7 +181,7 @@ List<Object> calculateChatMessages(
           nextMessage.createdAt! - message.createdAt! <= groupMessagesThreshold;
     }
     if (message.metadata != null && nextMessage?.metadata != null) {
-      isShowCouncil = message.metadata!['council'] != nextMessage!.metadata!['council'];
+      isShowCouncil = message.metadata!['alias'] != nextMessage!.metadata!['alias'];
     }
     if (isFirst && messageHasCreatedAt) {
       chatMessages.insert(
@@ -256,7 +256,7 @@ List<Object> calculateChatMessages(
       );
     }
     if (isShowCouncil) {
-      chatMessages.insert(0, CouncilHeader(council: nextMessage!.metadata!['council']));
+      chatMessages.insert(0, CouncilHeader(council: nextMessage!.metadata!['alias']));
     }
     if (message.id == lastReadMessageId && !isLast) {
       chatMessages.insert(
