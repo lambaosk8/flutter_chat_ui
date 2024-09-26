@@ -210,7 +210,7 @@ class Message extends StatelessWidget {
           message as types.TextMessage,
         );
     final messageBorderRadius = InheritedChatTheme.of(context).theme.messageBorderRadius;
-    final council = Council.fromKey(message.metadata!['council']);
+    final council = Council.fromKey(message.metadata!['alias']);
 
     final timeMessage = message.updatedAt != null
         ? message.status == types.Status.seen && showTimeSeenMessage == true
