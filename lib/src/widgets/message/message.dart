@@ -221,7 +221,7 @@ class Message extends StatelessWidget {
                 ),
               )
         : '';
-    final messageStatus = timeMessage + (council == Council.theplug ? '' : ' . ${council.title}');
+    final messageStatus = timeMessage + (council == Council.theplug ? '' : ' • ${council.title}');
     final borderRadius = bubbleRtlAlignment == BubbleRtlAlignment.left
         ? BorderRadiusDirectional.only(
             bottomEnd: Radius.circular(
