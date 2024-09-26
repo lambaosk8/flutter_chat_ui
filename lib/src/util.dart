@@ -209,6 +209,11 @@ List<Object> calculateChatMessages(
                 ),
         ),
       );
+
+      /// Handle insert council in first message.
+      if ((message.metadata != null && message.metadata!['alias'] != null)) {
+        chatMessages.insert(0, CouncilHeader(council: message.metadata!['alias']));
+      }
     }
 
     chatMessages.insert(0, {
